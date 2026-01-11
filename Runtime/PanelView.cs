@@ -1,6 +1,6 @@
 using System;
+using NaughtyAttributes;
 using PrimeTween;
-using TriInspector;
 using UnityEngine;
 using UnityEngine.Events;
 
