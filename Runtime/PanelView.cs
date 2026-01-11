@@ -1,0 +1,164 @@
+using System;
+using PrimeTween;
+using TriInspector;
+using UnityEngine;
+using UnityEngine.Events;
+
+namespace Gnarly.PanelSystem
+{
+    [DefaultExecutionOrder(-100)]
+    [RequireComponent(typeof(CanvasGroup))]
+    public class PanelView : MonoBehaviour
+    {
+        [Tooltip("The type of animation used for showing/hiding the panel")]
+        public PanelAnimationType animationType;
+        
+        [Tooltip("Duration in seconds for the show animation"), Space]
+        public float showDuration = 0.2f;
+        
+        [Tooltip("Duration in seconds for the hide animation")]
+        public float hideDuration = 0.2f;
+        
+        [Tooltip("Whether or not this panel is visible")]
+        public bool isVisibleOnLoad;
+        
+        [Tooltip("Whether to register this panel with the PanelManager")]
+        public bool canAccessViaKey;
+        
+        [Tooltip("Whether this panel can be dynamically loaded/unloaded")]
+        public bool canLoad;
+        
+        [ShowIf(nameof(canAccessViaKey)), Tooltip("Key used to identify this panel in the PanelManager")]
+        public string key;
+
+        [Tooltip("vent invoked when a panel becomes visible")]
+        public UnityEvent onShow;
+        
+        [Tooltip("Event invoked when a panel becomes hidden")]
+        public UnityEvent onHide;
+        
+        private Sequence _showSequence;
+        private Sequence _hideSequence;
+
+        public CanvasGroup Group { get; private set; }
+
+        public bool IsInteractable
+        {
+            get => Group.blocksRaycasts;
+            set => Group.blocksRaycasts = value;
+        }
+        
+        public bool IsVisible { get; private set; }
+
+        private void Awake()
+        {
+            Group = GetComponent<CanvasGroup>();
+            Group.interactable = true;
+            Group.blocksRaycasts = isVisibleOnLoad;
+
+            switch (animationType)
+            {
+                case PanelAnimationType.Scale:
+                    transform.localScale = isVisibleOnLoad ? Vector3.one : Vector3.zero;
+                    break;
+                case PanelAnimationType.Fade:
+                    Group.alpha = isVisibleOnLoad ? 1f : 0f;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+            
+            IsVisible = isVisibleOnLoad;
+            if (canAccessViaKey && !canLoad)
+                PanelManager.Add(this);
+        }
+
+        private void OnDestroy()
+        {
+            _hideSequence.Stop();
+            _showSequence.Stop();
+            
+            if (canAccessViaKey)
+                PanelManager.Remove(this);
+        }
+        
+        public void Show()
+        {
+            if (IsVisible) return;
+
+            _hideSequence.Stop();
+            _showSequence.Stop();
+            
+            _showSequence = this.MakeVisible(animationType);
+
+            IsVisible = true;
+            Group.blocksRaycasts = true;
+        }
+
+        /// <summary>
+        /// Sets this panel's sibling index to be one higher than the target
+        /// </summary>
+        public void SetFrontOf(Transform target)
+        {
+            var targetSiblingIndex = target.GetSiblingIndex() + 1;
+            transform.SetSiblingIndex(targetSiblingIndex);
+        }
+
+        /// <summary>
+        /// Sets this panel's sibling index to be one lower than the target
+        /// </summary>
+        public void SetBehindOf(Transform target)
+        {
+            var targetSiblingIndex = Mathf.Max(0, target.GetSiblingIndex() - 1);
+            transform.SetSiblingIndex(targetSiblingIndex);
+        }
+
+        /// <summary>
+        /// Sets this panel's sibling index as the last
+        /// </summary>
+        public void SetAsLastSibling()
+        {
+            transform.SetSiblingIndex(transform.parent.childCount - 1);
+        }
+        
+        public int GetSiblingIndex()
+        {
+            return transform.GetSiblingIndex();
+        }
+
+        public void SetSiblingIndex(int value)
+        {
+            transform.SetSiblingIndex(value);
+        }
+       
+        public void Hide(bool shouldDestroyAfterFinish = true)
+        {
+            if (!IsVisible) return;
+            
+            IsVisible = false;
+
+            _hideSequence.Stop();
+            _showSequence.Stop();
+            
+            _hideSequence = this.MakeHidden(animationType, shouldDestroyAfterFinish);
+        }
+        
+        public void OnHide(bool shouldDestroyAfterFinish = true)
+        {
+            Group.blocksRaycasts = false;
+            onHide?.Invoke();
+            
+            if (!shouldDestroyAfterFinish) return;
+            
+            Destroy();
+        }
+        
+        private void Destroy()
+        {
+            if (canLoad)
+            {
+                Destroy(gameObject);
+            }
+        }
+    }
+}

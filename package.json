@@ -1,0 +1,22 @@
+{
+    "name": "com.gnarlygamestudio.panelsystem",
+    "displayName": "Panel System",
+    "version": "1.0.0",
+    "unity": "2022.3",
+    "description": "A robust panel management system for Unity.",
+    "keywords": [
+        "ui",
+        "panels",
+        "architecture",
+        "window-system"
+    ],
+    "author": {
+        "name": "Gnarly Game Studio",
+        "email": "info@gnarlyteam.com",
+        "url": "https://github.com/Gnarly-Games"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Gnarly-Games/com.gnarlygamestudio.panelsystem.git"
+    }
+}
