@@ -1,6 +1,6 @@
 # **Panel System**
 
-A robust, code-driven panel management solution for Unity, powered by PrimeTween and TriInspector.
+A robust, code-driven panel management solution for Unity.
 
 ## **🚀 Getting Started**
 
