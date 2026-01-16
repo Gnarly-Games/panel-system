@@ -26,7 +26,7 @@ Import the **Starting Animations** sample from the Package Manager to get access
 
 #### **Custom Animations**
 Create a new class inheriting from `PanelAnimation` and implement the abstract methods:
-*   `SetInitialState()`: Reset the panel to its closed state (e.g., alpha 0).
+*   `Initialize()`: Reset the panel to its closed state (e.g., alpha 0).
 *   `MakeVisible()`: Return a `PrimeTween` Sequence for showing the panel.
 *   `MakeHidden()`: Return a `PrimeTween` Sequence for hiding the panel.
 
@@ -36,10 +36,10 @@ Create a new class inheriting from `PanelAnimation` and implement the abstract m
 public abstract class PanelAnimation : MonoBehaviour
 {
     // The PanelView this animation is attached to
-    public PanelView TargetPanel { get; }
+    protected abstract PanelView TargetPanel { get; set; }
 
     // Called on Awake to set the initial state (immediate, no animation)
-    public abstract void SetInitialState();
+    public abstract void Initialize();
 
     // Returns a Sequence that handles the "Show" animation
     public abstract Sequence MakeVisible();
@@ -63,8 +63,11 @@ public class PanelSlideAnimation : PanelAnimation
 {
     public Vector2 startOffset = new Vector2(0, -500);
 
-    public override void SetInitialState()
+    protected override PanelView TargetPanel {get; set;}
+
+    public override void Initialize()
     {
+        TargetPanel = GetComponent<PanelView>();
         var rect = TargetPanel.GetComponent<RectTransform>();
         
         if (TargetPanel.isVisibleOnLoad)

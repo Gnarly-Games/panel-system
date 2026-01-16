@@ -6,8 +6,12 @@ namespace Gnarly.PanelSystem
     [RequireComponent(typeof(PanelView))]
     public class PanelFadeAnimation : PanelAnimation
     {
-        public override void SetInitialState()
+        protected override PanelView TargetPanel { get; set; }
+
+        public override void Initialize()
         {
+            TargetPanel = GetComponent<PanelView>();
+
             if (TargetPanel.isVisibleOnLoad)
             {
                 TargetPanel.Group.alpha = 1f;

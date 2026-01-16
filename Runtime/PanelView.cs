@@ -56,7 +56,7 @@ namespace Gnarly.PanelSystem
             Group.interactable = true;
             Group.blocksRaycasts = isVisibleOnLoad;
             
-            panelAnimation.SetInitialState();
+            panelAnimation.Initialize();
             
             IsVisible = isVisibleOnLoad;
             if (canAccessViaKey && !canLoad)
@@ -82,6 +82,7 @@ namespace Gnarly.PanelSystem
             _showSequence = panelAnimation.MakeVisible();
 
             IsVisible = true;
+            Group.interactable = true;
             Group.blocksRaycasts = true;
         }
 
@@ -136,6 +137,7 @@ namespace Gnarly.PanelSystem
         public void OnHide(bool shouldDestroyAfterFinish = true)
         {
             Group.blocksRaycasts = false;
+            Group.interactable = false;
             onHide?.Invoke();
             
             if (!shouldDestroyAfterFinish) return;

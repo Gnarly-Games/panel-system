@@ -6,8 +6,12 @@ namespace Gnarly.PanelSystem
     [RequireComponent(typeof(PanelView))]
     public class PanelDelayAnimation : PanelAnimation
     {
-        public override void SetInitialState()
+        protected override PanelView TargetPanel { get; set; }
+
+        public override void Initialize()
         {
+            TargetPanel = GetComponent<PanelView>();
+            
             if (TargetPanel.isVisibleOnLoad)
             {
                 TargetPanel.Group.alpha = 1f;
@@ -26,6 +30,12 @@ namespace Gnarly.PanelSystem
         {
             var delayInSequence = Sequence.Create(useUnscaledTime: true);
             delayInSequence.ChainDelay(TargetPanel.showDuration);
+            delayInSequence.ChainCallback(() =>
+            {
+                TargetPanel.Group.alpha = 1f;
+                TargetPanel.Group.blocksRaycasts = true;
+                TargetPanel.Group.interactable = true;
+            });
             delayInSequence.OnComplete(() => TargetPanel.onShow?.Invoke());
 
             return delayInSequence;
@@ -35,6 +45,12 @@ namespace Gnarly.PanelSystem
         {
             var delayOutSequence = Sequence.Create(useUnscaledTime: true);
             delayOutSequence.ChainDelay(TargetPanel.hideDuration);
+            delayOutSequence.ChainCallback(() =>
+            {
+                TargetPanel.Group.alpha = 0f;
+                TargetPanel.Group.blocksRaycasts = false;
+                TargetPanel.Group.interactable = false;
+            });
             delayOutSequence.OnComplete(() => TargetPanel.OnHide(shouldDestroyAfterHide));
             
             return delayOutSequence;
