@@ -11,7 +11,7 @@ namespace Gnarly.PanelSystem
     public class PanelView : MonoBehaviour
     {
         [Tooltip("The type of animation used for showing/hiding the panel")]
-        public PanelAnimationType animationType;
+        public PanelAnimation panelAnimation;
         
         [Tooltip("Duration in seconds for the show animation"), Space]
         public float showDuration = 0.2f;
@@ -55,18 +55,8 @@ namespace Gnarly.PanelSystem
             Group = GetComponent<CanvasGroup>();
             Group.interactable = true;
             Group.blocksRaycasts = isVisibleOnLoad;
-
-            switch (animationType)
-            {
-                case PanelAnimationType.Scale:
-                    transform.localScale = isVisibleOnLoad ? Vector3.one : Vector3.zero;
-                    break;
-                case PanelAnimationType.Fade:
-                    Group.alpha = isVisibleOnLoad ? 1f : 0f;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            
+            panelAnimation.SetInitialState();
             
             IsVisible = isVisibleOnLoad;
             if (canAccessViaKey && !canLoad)
@@ -89,7 +79,7 @@ namespace Gnarly.PanelSystem
             _hideSequence.Stop();
             _showSequence.Stop();
             
-            _showSequence = this.MakeVisible(animationType);
+            _showSequence = panelAnimation.MakeVisible();
 
             IsVisible = true;
             Group.blocksRaycasts = true;
@@ -140,7 +130,7 @@ namespace Gnarly.PanelSystem
             _hideSequence.Stop();
             _showSequence.Stop();
             
-            _hideSequence = this.MakeHidden(animationType, shouldDestroyAfterFinish);
+            _hideSequence = panelAnimation.MakeHidden(shouldDestroyAfterFinish);
         }
         
         public void OnHide(bool shouldDestroyAfterFinish = true)

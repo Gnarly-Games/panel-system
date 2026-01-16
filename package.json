@@ -18,5 +18,12 @@
     "repository": {
         "type": "git",
         "url": "https://github.com/Gnarly-Games/com.gnarlygamestudio.panelsystem.git"
-    }
+    },
+    "samples": [
+        {
+            "displayName": "Starting Animations",
+            "description": "Premade animations for quick start.",
+            "path": "Samples~/StartingAnimations"
+        }
+    ]
 }
