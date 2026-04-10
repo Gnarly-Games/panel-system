@@ -10,44 +10,40 @@ namespace Gnarly.PanelSystem
     [RequireComponent(typeof(CanvasGroup))]
     public class PanelView : MonoBehaviour
     {
-        [Tooltip("The type of animation used for showing/hiding the panel")]
-        public PanelAnimation panelAnimation;
-        
         [Tooltip("Duration in seconds for the show animation"), Space]
         public float showDuration = 0.2f;
-        
+
         [Tooltip("Duration in seconds for the hide animation")]
         public float hideDuration = 0.2f;
-        
         [Tooltip("Whether or not this panel is visible")]
         public bool isVisibleOnLoad;
-        
-        [Tooltip("Whether to register this panel with the PanelManager")]
-        public bool canAccessViaKey;
-        
         [Tooltip("Whether this panel can be dynamically loaded/unloaded")]
         public bool canLoad;
-        
+        [Tooltip("Whether to register this panel with the PanelManager")]
+        public bool canAccessViaKey;
         [ShowIf(nameof(canAccessViaKey)), Tooltip("Key used to identify this panel in the PanelManager")]
         public string key;
 
         [Tooltip("vent invoked when a panel becomes visible")]
         public UnityEvent onShow;
-        
+
         [Tooltip("Event invoked when a panel becomes hidden")]
         public UnityEvent onHide;
-        
+
         private Sequence _showSequence;
         private Sequence _hideSequence;
 
         public CanvasGroup Group { get; private set; }
+
+        private PanelAnimation _panelAnimation;
+        private bool _lastAccessState;
 
         public bool IsInteractable
         {
             get => Group.blocksRaycasts;
             set => Group.blocksRaycasts = value;
         }
-        
+
         public bool IsVisible { get; private set; }
 
         private void Awake()
@@ -55,31 +51,47 @@ namespace Gnarly.PanelSystem
             Group = GetComponent<CanvasGroup>();
             Group.interactable = true;
             Group.blocksRaycasts = isVisibleOnLoad;
-            
-            panelAnimation.Initialize();
-            
+
+            if (TryGetComponent<PanelAnimation>(out var anim))
+                _panelAnimation = anim;
+            else
+                _panelAnimation = gameObject.AddComponent<PanelFadeAnimation>();
+
+            _panelAnimation.Initialize();
+
             IsVisible = isVisibleOnLoad;
-            if (canAccessViaKey && !canLoad)
+            if (canAccessViaKey)
                 PanelManager.Add(this);
+        }
+
+        private void OnEnable()
+        {
+            _lastAccessState = canAccessViaKey;
+        }
+
+        private void OnValidate()
+        {
+            if (canAccessViaKey && string.IsNullOrEmpty(key))
+                key = gameObject.name;
         }
 
         private void OnDestroy()
         {
             _hideSequence.Stop();
             _showSequence.Stop();
-            
+
             if (canAccessViaKey)
                 PanelManager.Remove(this);
         }
-        
+
         public void Show()
         {
             if (IsVisible) return;
 
             _hideSequence.Stop();
             _showSequence.Stop();
-            
-            _showSequence = panelAnimation.MakeVisible();
+
+            _showSequence = _panelAnimation.MakeVisible();
 
             IsVisible = true;
             Group.interactable = true;
@@ -111,7 +123,7 @@ namespace Gnarly.PanelSystem
         {
             transform.SetSiblingIndex(transform.parent.childCount - 1);
         }
-        
+
         public int GetSiblingIndex()
         {
             return transform.GetSiblingIndex();
@@ -121,30 +133,30 @@ namespace Gnarly.PanelSystem
         {
             transform.SetSiblingIndex(value);
         }
-       
+
         public void Hide(bool shouldDestroyAfterFinish = true)
         {
             if (!IsVisible) return;
-            
+
             IsVisible = false;
 
             _hideSequence.Stop();
             _showSequence.Stop();
-            
-            _hideSequence = panelAnimation.MakeHidden(shouldDestroyAfterFinish);
+
+            _hideSequence = _panelAnimation.MakeHidden(shouldDestroyAfterFinish);
         }
-        
+
         public void OnHide(bool shouldDestroyAfterFinish = true)
         {
             Group.blocksRaycasts = false;
             Group.interactable = false;
             onHide?.Invoke();
-            
+
             if (!shouldDestroyAfterFinish) return;
-            
+
             Destroy();
         }
-        
+
         private void Destroy()
         {
             if (canLoad)

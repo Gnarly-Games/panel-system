@@ -25,7 +25,7 @@ namespace Gnarly.PanelSystem
                 TargetPanel.Group.interactable = false;
             }
         }
-        
+
         public override Sequence MakeVisible()
         {
             var scaleInSequence = Sequence.Create(useUnscaledTime: true);
@@ -40,7 +40,6 @@ namespace Gnarly.PanelSystem
             var scaleOutSequence = Sequence.Create(useUnscaledTime: true);
             scaleOutSequence.Chain(Tween.Scale(TargetPanel.transform, 0f, TargetPanel.hideDuration, Ease.InBack));
             scaleOutSequence.OnComplete(() => TargetPanel.OnHide(shouldDestroyAfterHide));
-            
             return scaleOutSequence;
         }
     }

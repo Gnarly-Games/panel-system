@@ -11,7 +11,7 @@ namespace Gnarly.PanelSystem
         public override void Initialize()
         {
             TargetPanel = GetComponent<PanelView>();
-            
+
             if (TargetPanel.isVisibleOnLoad)
             {
                 TargetPanel.Group.alpha = 1f;
@@ -52,7 +52,7 @@ namespace Gnarly.PanelSystem
                 TargetPanel.Group.interactable = false;
             });
             delayOutSequence.OnComplete(() => TargetPanel.OnHide(shouldDestroyAfterHide));
-            
+
             return delayOutSequence;
         }
     }
