@@ -3,6 +3,7 @@ using NaughtyAttributes;
 using PrimeTween;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 namespace Gnarly.PanelSystem
 {
@@ -15,11 +16,11 @@ namespace Gnarly.PanelSystem
 
         [Tooltip("Duration in seconds for the hide animation")]
         public float hideDuration = 0.2f;
-        [Tooltip("Whether or not this panel is visible")]
+        [Tooltip("Whether or not this panel is visible"), FormerlySerializedAs("initialState")]
         public bool isVisibleOnLoad;
         [Tooltip("Whether this panel can be dynamically loaded/unloaded")]
         public bool canLoad;
-        [Tooltip("Whether to register this panel with the PanelManager")]
+        [Tooltip("Whether to register this panel with the PanelManager"), FormerlySerializedAs("register")]
         public bool canAccessViaKey;
         [ShowIf(nameof(canAccessViaKey)), Tooltip("Key used to identify this panel in the PanelManager")]
         public string key;
