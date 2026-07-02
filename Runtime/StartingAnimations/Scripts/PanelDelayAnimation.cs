@@ -16,13 +16,11 @@ namespace Gnarly.PanelSystem
             {
                 TargetPanel.Group.alpha = 1f;
                 TargetPanel.Group.blocksRaycasts = true;
-                TargetPanel.Group.interactable = true;
             }
             else
             {
                 TargetPanel.Group.alpha = 0f;
                 TargetPanel.Group.blocksRaycasts = false;
-                TargetPanel.Group.interactable = false;
             }
         }
 
@@ -34,7 +32,6 @@ namespace Gnarly.PanelSystem
             {
                 TargetPanel.Group.alpha = 1f;
                 TargetPanel.Group.blocksRaycasts = true;
-                TargetPanel.Group.interactable = true;
             });
             delayInSequence.OnComplete(() => TargetPanel.onShow?.Invoke());
 
@@ -49,7 +46,6 @@ namespace Gnarly.PanelSystem
             {
                 TargetPanel.Group.alpha = 0f;
                 TargetPanel.Group.blocksRaycasts = false;
-                TargetPanel.Group.interactable = false;
             });
             delayOutSequence.OnComplete(() => TargetPanel.OnHide(shouldDestroyAfterHide));
 

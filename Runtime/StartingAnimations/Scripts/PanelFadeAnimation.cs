@@ -16,13 +16,11 @@ namespace Gnarly.PanelSystem
             {
                 TargetPanel.Group.alpha = 1f;
                 TargetPanel.Group.blocksRaycasts = true;
-                TargetPanel.Group.interactable = true;
             }
             else
             {
                 TargetPanel.Group.alpha = 0f;
                 TargetPanel.Group.blocksRaycasts = false;
-                TargetPanel.Group.interactable = false;
             }
         }
 

@@ -16,13 +16,11 @@ namespace Gnarly.PanelSystem
             {
                 TargetPanel.transform.localScale = Vector3.one;
                 TargetPanel.Group.blocksRaycasts = true;
-                TargetPanel.Group.interactable = true;
             }
             else
             {
                 TargetPanel.transform.localScale = Vector3.zero;
                 TargetPanel.Group.blocksRaycasts = false;
-                TargetPanel.Group.interactable = false;
             }
         }
 
