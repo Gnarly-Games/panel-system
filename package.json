@@ -1,7 +1,7 @@
 {
     "name": "com.gnarlygamestudio.panelsystem",
     "displayName": "Panel System",
-    "version": "1.2.1",
+    "version": "1.3.0",
     "unity": "2022.3",
     "description": "A robust panel management system for Unity.",
     "keywords": [

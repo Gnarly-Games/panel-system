@@ -1,8 +1,6 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using PrimeTween;
 
 namespace Gnarly.PanelSystem
 {
@@ -12,8 +10,9 @@ namespace Gnarly.PanelSystem
         private const string DuplicateKeyError = "PanelView Add Error!: Used same key {0}";
         private const string MissingKeyError = "PanelView Remove Error!: Missing key {0}";
         private const string PanelLoadError = "PanelView Get Error!: Missing key {0}";
+        private const string PanelLoadKeyError = "PanelView Get Error!: The panel key doesn't match {0}";
 
-        private static readonly Dictionary<string, PanelView> PanelViews = new();
+        private static readonly Dictionary<string, PanelView> Panels = new();
 
         public static GameObject MainCanvas { get; set; }
 
@@ -21,7 +20,7 @@ namespace Gnarly.PanelSystem
         {
             if (!panelToAdd) throw new ArgumentNullException(nameof(panelToAdd));
 
-            var isSuccess = PanelViews.TryAdd(panelToAdd.key, panelToAdd);
+            var isSuccess = Panels.TryAdd(panelToAdd.key, panelToAdd);
             if (isSuccess) return;
 
             Debug.LogError(string.Format(DuplicateKeyError, panelToAdd.key));
@@ -31,7 +30,7 @@ namespace Gnarly.PanelSystem
         {
             if (!panelToRemove) throw new ArgumentNullException(nameof(panelToRemove));
 
-            var isSuccess = PanelViews.Remove(panelToRemove.key);
+            var isSuccess = Panels.Remove(panelToRemove.key);
             if (isSuccess) return;
 
             Debug.LogWarning(string.Format(MissingKeyError, panelToRemove.key));
@@ -41,7 +40,7 @@ namespace Gnarly.PanelSystem
         {
             if (string.IsNullOrEmpty(key)) throw new ArgumentNullException(nameof(key));
 
-            return PanelViews.TryGetValue(key, out var panel) ? panel : CreateAndRegisterPanel(key);
+            return Panels.TryGetValue(key, out var panel) ? panel : CreateAndRegisterPanel(key);
         }
 
         public static T GetOrCreate<T>(string key = null)
@@ -55,13 +54,13 @@ namespace Gnarly.PanelSystem
         public static bool IsLoaded<T>(string key = null)
         {
             var panelKey = GetPanelKey<T>(key);
-            return PanelViews.ContainsKey(panelKey);
+            return Panels.ContainsKey(panelKey);
         }
 
         private static string GetPanelKey<T>(string key)
         {
             return string.IsNullOrEmpty(key)
-                ? typeof(T).ToString().Split(".").Last()
+                ? typeof(T).Name
                 : key;
         }
 
@@ -71,6 +70,12 @@ namespace Gnarly.PanelSystem
             if (!panelViewPrefab)
             {
                 Debug.LogError(string.Format(PanelLoadError, key));
+                return null;
+            }
+
+            if (panelViewPrefab.canAccessViaKey is false)
+            {
+                Debug.LogError(string.Format(PanelLoadKeyError, key));
                 return null;
             }
 
