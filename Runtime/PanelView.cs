@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
@@ -32,7 +33,7 @@ namespace Gnarly.PanelSystem
         private float _hideStartTime;
         private float _showStartTime;
 
-        public enum State
+        public enum PanelState
         {
             Hide,
             Showing,
@@ -40,32 +41,37 @@ namespace Gnarly.PanelSystem
             Hiding
         }
 
-        public State state { get; private set; }
+        public PanelState State { get; private set; }
 
         public CanvasGroup Group { get; private set; }
-
-
         public bool IsVisible { get; private set; }
 
         private void Awake()
         {
             Group = GetComponent<CanvasGroup>();
-            Group.blocksRaycasts = isVisibleOnLoad;
-
-            IsVisible = isVisibleOnLoad;
             if (canAccessViaKey)
                 PanelManager.Add(this);
 
+            IsVisible = isVisibleOnLoad;
+
             if (IsVisible)
-                OnShow();
+                ShowCompleted();
             else
-                OnHide();
+                HideCompleted();
         }
 
         private void OnValidate()
         {
-            if (canAccessViaKey && string.IsNullOrEmpty(key))
-                key = gameObject.name;
+            if (canAccessViaKey)
+            {
+                if (string.IsNullOrEmpty(key))
+                    key = gameObject.name;
+            }
+            else
+            {
+                key = string.Empty;
+            }
+
         }
 
         private void OnDestroy()
@@ -79,12 +85,15 @@ namespace Gnarly.PanelSystem
             if (IsVisible) return;
             IsVisible = true;
             Group.blocksRaycasts = true;
-            state = State.Showing;
+            State = PanelState.Showing;
             _showStartTime = Time.time;
         }
 
-        private void OnShow()
+        private void ShowCompleted()
         {
+            Group.alpha = 1;
+            Group.blocksRaycasts = true;
+            State = PanelState.Showed;
             onShow?.Invoke();
         }
 
@@ -124,58 +133,48 @@ namespace Gnarly.PanelSystem
             transform.SetSiblingIndex(value);
         }
 
-        public void Hide(bool shouldDestroyAfterFinish = true)
+        public void Hide()
         {
             if (!IsVisible) return;
 
             IsVisible = false;
             _hideStartTime = Time.time;
-            state = State.Hiding;
+            State = PanelState.Hiding;
         }
 
-        public void OnHide(bool shouldDestroyAfterFinish = true)
+        private void HideCompleted()
         {
+            Group.alpha = 0;
+            State = PanelState.Hide;
             Group.blocksRaycasts = false;
             onHide?.Invoke();
 
-            if (!shouldDestroyAfterFinish) return;
-
-            Destroy();
-        }
-
-        private void Destroy()
-        {
             if (isDestroyOnHide)
-            {
                 Destroy(gameObject);
-            }
         }
 
         private void Update()
         {
-            if (state == State.Hiding)
+            if (State == PanelState.Hiding)
             {
                 var passTime = Time.time - _hideStartTime;
                 var progress = passTime / hideDuration;
                 Group.alpha = Mathf.Lerp(1, 0, progress);
                 if (progress >= 1)
                 {
-                    state = State.Hide;
-                    OnHide();
+                    HideCompleted();
                 }
             }
-            else if (state == State.Showing)
+            else if (State == PanelState.Showing)
             {
                 var passTime = Time.time - _showStartTime;
                 var progress = passTime / hideDuration;
                 Group.alpha = Mathf.Lerp(0, 1, progress);
                 if (progress >= 1)
                 {
-                    state = State.Showed;
-                    OnShow();
+                    ShowCompleted();
                 }
             }
-
         }
     }
 }
