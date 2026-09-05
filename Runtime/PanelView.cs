@@ -17,7 +17,7 @@ namespace Gnarly.PanelSystem
         public float hideDuration = 0.2f;
         [Tooltip("Whether or not this panel is visible"), FormerlySerializedAs("initialState")]
         public bool isVisibleOnLoad;
-        [Tooltip("Whether this panel can be destroy on hide")]
+        [Tooltip("Whether this panel can be destroy on hide"), FormerlySerializedAs("canLoad")]
         public bool isDestroyOnHide;
         [Tooltip("Whether to register this panel with the PanelManager"), FormerlySerializedAs("register")]
         public bool canAccessViaKey;
@@ -145,7 +145,7 @@ namespace Gnarly.PanelSystem
 
         private void Destroy()
         {
-            if (isDestroyOnHide)
+            if (isDestroyOnHides)
             {
                 Destroy(gameObject);
             }
