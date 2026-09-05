@@ -145,7 +145,7 @@ namespace Gnarly.PanelSystem
 
         private void Destroy()
         {
-            if (isDestroyOnHides)
+            if (isDestroyOnHide)
             {
                 Destroy(gameObject);
             }
