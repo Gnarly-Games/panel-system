@@ -55,6 +55,11 @@ namespace Gnarly.PanelSystem
             IsVisible = isVisibleOnLoad;
             if (canAccessViaKey)
                 PanelManager.Add(this);
+
+            if (IsVisible)
+                OnShow();
+            else
+                OnHide();
         }
 
         private void OnValidate()
