@@ -1,5 +1,3 @@
-using System;
-using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
 
@@ -55,9 +53,19 @@ namespace Gnarly.PanelSystem
             IsVisible = isVisibleOnLoad;
 
             if (IsVisible)
-                ShowCompleted();
+            {
+                Group.alpha = 1;
+                Group.blocksRaycasts = true;
+                State = PanelState.Showed;
+                onShow?.Invoke();
+            }
             else
-                HideCompleted();
+            {
+                Group.alpha = 0;
+                Group.blocksRaycasts = false;
+                State = PanelState.Hide;
+                onHide?.Invoke();
+            }
         }
 
         private void OnValidate()
