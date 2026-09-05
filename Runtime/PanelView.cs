@@ -51,7 +51,7 @@ namespace Gnarly.PanelSystem
         {
             Group = GetComponent<CanvasGroup>();
             Group.blocksRaycasts = isVisibleOnLoad;
-            
+
             IsVisible = isVisibleOnLoad;
             if (canAccessViaKey)
                 PanelManager.Add(this);
@@ -74,17 +74,8 @@ namespace Gnarly.PanelSystem
             if (IsVisible) return;
             IsVisible = true;
             Group.blocksRaycasts = true;
-
-            if (showDuration <= 0)
-            {
-                state = State.Showed;
-                OnShow();
-            }
-            else
-            {
-                _showStartTime = Time.time;
-                state = State.Showing;
-            }
+            state = State.Showing;
+            _showStartTime = Time.time;
         }
 
         private void OnShow()
@@ -133,17 +124,8 @@ namespace Gnarly.PanelSystem
             if (!IsVisible) return;
 
             IsVisible = false;
-
-            if (hideDuration <= 0)
-            {
-                state = State.Hide;
-                OnHide();
-            }
-            else
-            {
-                _hideStartTime = Time.time;
-                state = State.Hiding;
-            }
+            _hideStartTime = Time.time;
+            state = State.Hiding;
         }
 
         public void OnHide(bool shouldDestroyAfterFinish = true)
@@ -166,7 +148,6 @@ namespace Gnarly.PanelSystem
 
         private void Update()
         {
-
             if (state == State.Hiding)
             {
                 var passTime = Time.time - _hideStartTime;
