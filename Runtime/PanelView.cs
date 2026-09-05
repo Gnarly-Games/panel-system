@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
 
@@ -28,8 +29,6 @@ namespace Gnarly.PanelSystem
 
         [Tooltip("Event invoked when a panel becomes hidden")]
         public UnityEvent onHide;
-        private float _hideStartTime;
-        private float _showStartTime;
 
         public enum PanelState
         {
@@ -39,7 +38,6 @@ namespace Gnarly.PanelSystem
             Hiding
         }
 
-        public PanelState State { get; private set; }
 
         public CanvasGroup Group { get; private set; }
         public bool IsVisible { get; private set; }
@@ -56,14 +54,12 @@ namespace Gnarly.PanelSystem
             {
                 Group.alpha = 1;
                 Group.blocksRaycasts = true;
-                State = PanelState.Showed;
                 onShow?.Invoke();
             }
             else
             {
                 Group.alpha = 0;
                 Group.blocksRaycasts = false;
-                State = PanelState.Hide;
                 onHide?.Invoke();
             }
         }
@@ -92,17 +88,39 @@ namespace Gnarly.PanelSystem
         {
             if (IsVisible) return;
             IsVisible = true;
-            Group.blocksRaycasts = true;
-            State = PanelState.Showing;
-            _showStartTime = Time.time;
+            StopAllCoroutines();
+            StartCoroutine(Progress(true));
         }
 
-        private void ShowCompleted()
+        private IEnumerator Progress(bool show)
         {
-            Group.alpha = 1;
-            Group.blocksRaycasts = true;
-            State = PanelState.Showed;
-            onShow?.Invoke();
+            Group.blocksRaycasts = show;
+            var startTime = Time.realtimeSinceStartup;
+            var startValue = show ? 0 : 1f;
+            var endValue = show ? 1 : 0;
+
+            while (true)
+            {
+                var passTime = Time.realtimeSinceStartup - startTime;
+                var progress = passTime / hideDuration;
+                Group.alpha = Mathf.Lerp(startValue, endValue, progress);
+                if (progress >= 1)
+                    break;
+
+                yield return null;
+
+            }
+
+            if (show)
+            {
+                onShow?.Invoke();
+            }
+            else
+            {
+                onHide?.Invoke();
+                if (isDestroyOnHide)
+                    Destroy(gameObject);
+            }
         }
 
         /// <summary>
@@ -144,45 +162,9 @@ namespace Gnarly.PanelSystem
         public void Hide()
         {
             if (!IsVisible) return;
-
             IsVisible = false;
-            _hideStartTime = Time.time;
-            State = PanelState.Hiding;
-        }
-
-        private void HideCompleted()
-        {
-            Group.alpha = 0;
-            State = PanelState.Hide;
-            Group.blocksRaycasts = false;
-            onHide?.Invoke();
-
-            if (isDestroyOnHide)
-                Destroy(gameObject);
-        }
-
-        private void Update()
-        {
-            if (State == PanelState.Hiding)
-            {
-                var passTime = Time.time - _hideStartTime;
-                var progress = passTime / hideDuration;
-                Group.alpha = Mathf.Lerp(1, 0, progress);
-                if (progress >= 1)
-                {
-                    HideCompleted();
-                }
-            }
-            else if (State == PanelState.Showing)
-            {
-                var passTime = Time.time - _showStartTime;
-                var progress = passTime / hideDuration;
-                Group.alpha = Mathf.Lerp(0, 1, progress);
-                if (progress >= 1)
-                {
-                    ShowCompleted();
-                }
-            }
+            StopAllCoroutines();
+            StartCoroutine(Progress(false));
         }
     }
 }
